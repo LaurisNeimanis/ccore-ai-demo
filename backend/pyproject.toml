@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "ccore-ai-demo-backend"
+version = "0.1.0"
+description = "FastAPI demo backend for CCore-AI"
+authors = ["Lauris Neimanis"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.0"
+uvicorn = "^0.30.0"
+pydantic = "^2.7.0"
+requests = "^2.32.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

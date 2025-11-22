@@ -1,0 +1,70 @@
+# --------------------------------------
+# Python
+# --------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Poetry lock (optional – usually kept)
+# poetry.lock
+
+# Byte-compiled / optimized / DLL files
+*.egg-info/
+*.egg
+.eggs/
+
+# --------------------------------------
+# Docker
+# --------------------------------------
+docker-data/
+*.log
+
+# --------------------------------------
+# Streamlit cache
+# --------------------------------------
+frontend/.streamlit/
+.streamlit/
+
+# --------------------------------------
+# Build & artifacts
+# --------------------------------------
+dist/
+build/
+site/
+htmlcov/
+coverage.xml
+cov_html/
+
+# --------------------------------------
+# IDE files
+# --------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --------------------------------------
+# OS files
+# --------------------------------------
+.DS_Store
+Thumbs.db
+
+# --------------------------------------
+# Local environment files
+# --------------------------------------
+.env
+.env.*
+!.env.example
+
+# --------------------------------------
+# CI artifacts
+# --------------------------------------
+*.coverage
