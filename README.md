@@ -111,6 +111,8 @@ http://localhost:8501
 - No server-side builds
 - Terraform + Ansible handle full orchestration, SSL, directories, configs
 
+🔗 **Infrastructure repo:** https://github.com/LaurisNeimanis/ccore-ai-infra
+
 ---
 
 ## 8. Integration with ccore-ai-infra
