@@ -12,111 +12,146 @@
   <img src="https://github.com/LaurisNeimanis/ccore-ai-demo/actions/workflows/build-frontend.yml/badge.svg" />
 </p>
 
-Application layer of the **CCore-AI** stack.
+Application layer of the **CCore-AI** stack.  
+This repository provides a clean, production‑ready containerized demo aligned with the infrastructure in **ccore-ai-infra**.
 
-This repository demonstrates a clean, production-ready demo environment built with modern DevOps and AI application practices.
+---
 
-## Features
+## 1. Prerequisites
+
+- Docker ≥ 24
+- Docker Compose plugin
+- GitHub Actions enabled for automated CI builds
+- GHCR access (public images by default)
+
+---
+
+## 2. Features
 
 - FastAPI backend
 - Streamlit frontend
-- Chroma vector database
-- Fully containerized services (Docker)
-- CI/CD pipelines (GitHub Actions → GHCR)
-- Ready for deployment on the infrastructure created in **ccore-ai-infra**
+- Chroma vector DB
+- Fully containerized
+- CI pipelines → GHCR images
+- Seamless deployment via **ccore-ai-infra**
 
-## Tech Overview
+---
 
-This demo follows the same architectural principles used in production AI systems:
+## 3. Technology Overview
 
-### Backend (FastAPI)
+### 3.1 Backend (FastAPI)
 
-- Modular route structure
-- Clear separation between API layer, service layer and configuration
-- Deterministic, container-based builds using Poetry
-- Healthcheck endpoint for orchestration and monitoring
+- Modular architecture
+- Clear separation between API, services, config
+- Deterministic builds using Poetry
+- Healthcheck endpoint for orchestration
 
-### Frontend (Streamlit)
+### 3.2 Frontend (Streamlit)
 
-- Lightweight, interactive interface to test end-to-end flows
-- Direct integration with the backend service
+- Lightweight interactive UI
+- Directly communicates with the backend
 - Zero local dependencies — fully dockerized
 
-### Vector Database (Chroma)
+### 3.3 Vector Database (Chroma)
 
-- Local development vector DB for structured retrieval examples
-- Demonstrates RAG-style data flow without exposing proprietary logic
+- Local RAG‑style retrieval example
+- No proprietary datasets included
 
-### Containers & DevOps
+### 3.4 DevOps & Containers
 
-- Backend and frontend use isolated Dockerfiles with `.dockerignore`
-- CI builds and scans images in GitHub Actions
-- Images pushed automatically to GHCR
-- Production deploy is a pull-based workflow (zero local builds on server)
+- Separate Dockerfiles for backend & frontend
+- CI builds both images and pushes to GHCR
+- Production deployment is **pull‑only** on EC2
 
-### Infrastructure Integration
+---
 
-- Designed to work with the Terraform + Ansible stack in **ccore-ai-infra**
-- EC2 serves as the orchestrator for the full Docker Compose application
-- Clean separation between application and infrastructure layers
-
-This mirrors real-world DevOps + AI engineering workflows and demonstrates how to structure a reproducible, container-first environment.
-
-## Architecture (Mermaid Diagram)
+## 4. Architecture (High-Level)
 
 ```mermaid
 flowchart LR
-    subgraph Client
-        UI[Streamlit Frontend]
-    end
-
-    subgraph Backend
-        API[FastAPI Service]
-        RAGStub[RAG Stub Logic]
-    end
-
-    subgraph VectorDB
-        Chroma[(Chroma Vector DB)]
-    end
-
-    subgraph Infra["Deployed via ccore-ai-infra"]
-        DockerCompose[Docker Compose Stack]
-        EC2[(EC2 Instance)]
-    end
-
-    UI -->|HTTP| API
-    API -->|Query| RAGStub
-    RAGStub -->|Lookup| Chroma
-    DockerCompose --> API
-    DockerCompose --> UI
-    DockerCompose --> Chroma
-    EC2 --> DockerCompose
+    Browser[User Browser] -->|HTTPS| Nginx[Nginx Reverse Proxy]
+    Nginx --> UI[Streamlit Frontend]
+    UI --> API[FastAPI Backend]
+    API --> Chroma[(Chroma Vector DB)]
 ```
 
-## Run Locally
+> Full detailed architecture: `diagrams/app-architecture.mmd`
 
-Development environment:
+---
+
+## 5. Deployment Pipeline
+
+```mermaid
+flowchart LR
+    A[Developer Commit] --> B[GitHub Actions Build]
+    B --> C[Push Images to GHCR]
+    C --> D["ccore-ai-infra (Terraform + Ansible)"]
+    D --> E[EC2 Pulls Updated Images]
+    E --> F[Docker Compose Stack Updated]
+```
+
+---
+
+## 6. Running Locally
 
 ```bash
 docker compose -f compose/docker-compose.dev.yml up --build
 ```
 
-Frontend: http://localhost:8501
+Frontend accessible at:  
+http://localhost:8501
 
-## Production Deployment (via ccore-ai-infra)
+---
 
-- CI/CD builds and pushes Docker images to GHCR
-- EC2 instance pulls updated images
-- Docker Compose restarts the full stack
+## 7. Production Deployment (via ccore-ai-infra)
 
-No code is built on the server — deployment is pull-based and container-driven.
+- GitHub Actions builds & pushes images
+- EC2 pulls latest images
+- Docker Compose restarts automatically
+- No server-side builds
+- Terraform + Ansible handle full orchestration, SSL, directories, configs
 
-## Notes
+---
 
-This repository contains **stub implementations only**:
+## 8. Integration with ccore-ai-infra
 
-- no real RAG logic
-- no private datasets
-- no business or proprietary components
+Terraform provisions EC2 + networking.  
+Ansible:
 
-The purpose is to demonstrate structure, architecture, and workflow — not application complexity.
+- Installs Docker Engine
+- Generates Docker Compose configuration
+- Pulls GHCR images
+- Runs the application stack
+
+Images used:
+
+- `ghcr.io/laurisneimanis/ccore-ai-demo-backend:latest`
+- `ghcr.io/laurisneimanis/ccore-ai-demo-frontend:latest`
+
+---
+
+## 9. Security & Best Practices
+
+- Deterministic CI builds
+- No secrets on EC2
+- HTTPS termination via infrastructure layer
+- Backend never exposed publicly
+- GHCR authentication handled by CI
+
+---
+
+## 10. Notes
+
+This repository contains **demo implementations only**:
+
+- No real RAG logic
+- No proprietary data
+- No business-critical components
+
+Purpose: demonstrate structure, architecture and workflow.
+
+---
+
+## License
+
+MIT License.
