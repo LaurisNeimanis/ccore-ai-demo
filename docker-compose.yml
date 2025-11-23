@@ -12,6 +12,10 @@ services:
   frontend:
     image: ghcr.io/laurisneimanis/ccore-ai-demo-frontend:latest
     container_name: ccore-frontend
+    environment:
+      STREAMLIT_SERVER_ADDRESS: "0.0.0.0"
+      STREAMLIT_SERVER_PORT: "8501"
+      STREAMLIT_SERVER_ENABLE_CORS: "false"
     restart: unless-stopped
     ports:
       - "8501:8501"
