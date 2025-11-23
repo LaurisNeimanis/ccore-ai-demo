@@ -2,12 +2,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install Poetry
-RUN pip install poetry
+# Install dependencies
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY pyproject.toml /app/
-RUN poetry install --no-root --no-interaction --no-ansi
+# Copy frontend app
+COPY . /app/
 
-COPY app.py /app/
-
-CMD ["poetry", "run", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.enableCORS=false"]
+# Streamlit will read ENV from docker-compose
+CMD ["streamlit", "run", "app.py"]
