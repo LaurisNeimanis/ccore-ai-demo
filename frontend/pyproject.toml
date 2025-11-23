@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ccore-ai-demo-frontend"
-version = "0.1.0"
+version = "0.1.1"
 description = "Streamlit demo frontend for CCore-AI"
 authors = ["Lauris Neimanis"]
 

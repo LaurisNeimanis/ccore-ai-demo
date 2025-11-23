@@ -1,11 +1,16 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Stack-FastAPI | Streamlit | Chroma-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Docker-Containerized-green?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/CI/CD-GitHub Actions-yellow?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Infra-ccore--ai--infra-orange?style=for-the-badge" />
+# CCore-AI Demo Application
+
+<p>
+  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white" />
+  <img src="https://img.shields.io/badge/Chroma-7E57C2?logo=undertow&logoColor=white" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" />
 </p>
 
-# CCore-AI Demo
+<p>
+  <img src="https://github.com/LaurisNeimanis/ccore-ai-demo/actions/workflows/build-backend.yml/badge.svg" />
+  <img src="https://github.com/LaurisNeimanis/ccore-ai-demo/actions/workflows/build-frontend.yml/badge.svg" />
+</p>
 
 Application layer of the **CCore-AI** stack.
 
@@ -96,7 +101,6 @@ Development environment:
 docker compose -f compose/docker-compose.dev.yml up --build
 ```
 
-Backend: http://localhost:8000  
 Frontend: http://localhost:8501
 
 ## Production Deployment (via ccore-ai-infra)
