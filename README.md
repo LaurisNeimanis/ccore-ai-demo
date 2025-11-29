@@ -166,6 +166,6 @@ No production logic or datasets included.
 
 ---
 
-## License
+## 9. License
 
 MIT License.
