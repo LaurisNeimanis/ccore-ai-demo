@@ -1,72 +1,98 @@
 # CCore-AI Demo Application
 
-<p>
-  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" />
-  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white" />
-  <img src="https://img.shields.io/badge/Chroma-7E57C2?logo=undertow&logoColor=white" />
-  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" />
-</p>
+This repository contains the **application layer** (backend + frontend) for the  
+**CCore-AI infrastructure stack**, deployed through the companion project  
+`ccore-ai-infra`.
 
-<p>
-  <img src="https://github.com/LaurisNeimanis/ccore-ai-demo/actions/workflows/build-backend.yml/badge.svg" />
-  <img src="https://github.com/LaurisNeimanis/ccore-ai-demo/actions/workflows/build-frontend.yml/badge.svg" />
-</p>
+The design follows clean DevOps principles:
 
-Application layer of the **CCore-AI** stack.  
-This repository contains a fully containerized backend + frontend demo used by the
-infrastructure project **ccore-ai-infra**.
+- strict backend / frontend separation  
+- deterministic Docker image builds  
+- CI → GHCR publishing  
+- production deployments are **pull-only** (no builds on servers)  
+- fully compatible with the Terraform + Ansible automation layer  
+
+This repository intentionally stays lightweight and infrastructure-agnostic.
 
 ---
 
-## 1. Prerequisites
+## 1. Repository Structure
 
-- Docker ≥ 24
-- Docker Compose plugin
-- GitHub Actions enabled for CI
-- GHCR (images are public)
-
----
-
-## 2. Features
-
-- **FastAPI** backend
-- **Streamlit** frontend
-- **Chroma** vector DB (local demo mode)
-- Clean Dockerfile separation (backend / frontend)
-- GitHub Actions → GHCR build pipelines
-- Production deployment is **pull-only** (no builds on EC2)
-
----
-
-## 3. Technology Overview
-
-### 3.1 Backend (FastAPI)
-
-- Modular structure (API / services / config)
-- Healthcheck endpoints for orchestration
-- Deterministic builds via Poetry
-
-### 3.2 Frontend (Streamlit)
-
-- Minimal interactive UI
-- Direct API communication
-- Zero local dependencies (Docker only)
-
-### 3.3 Chroma Vector Database
-
-- Embedded vector store
-- Basic RAG-style retrieval example
-- No proprietary datasets
-
-### 3.4 DevOps & Containers
-
-- Separate backend + frontend Dockerfiles
-- CI builds → GHCR images
-- Production uses pull-based updates from **ccore-ai-infra**
+```
+ccore-ai-demo/
+├── backend/                     # FastAPI backend
+│   ├── app/                     # API source code
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── frontend/                    # Streamlit frontend
+│   ├── app.py
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── compose/
+│   └── docker-compose.dev.yml   # Local development compose stack
+│
+├── docker-compose.yml           # Prod/main compose (infra layer consumes)
+├── .github/workflows/           # CI pipelines (backend + frontend image builds)
+│   ├── build-backend.yml
+│   └── build-frontend.yml
+│
+├── .env.example
+└── README.md
+```
 
 ---
 
-## 4. Architecture (Repository-Local)
+## 2. Technology Stack
+
+### Backend — **FastAPI**
+- Clear modular API structure  
+- Healthcheck endpoints  
+- Lightweight request handling  
+- Fully containerized
+
+### Frontend — **Streamlit**
+- Minimal UI for interacting with backend  
+- Zero local Python dependencies (Docker only)  
+
+### Vector Database — **Chroma**
+- Embedded vector store  
+- Demonstrates basic RAG-style retrieval  
+- Runs in local-only mode for demo purposes  
+
+### Containers & DevOps
+- Separate Dockerfiles for backend & frontend  
+- GitHub Actions build pipelines  
+- Images pushed to GHCR under:
+  - `ghcr.io/laurisneimanis/ccore-ai-demo-backend:latest`
+  - `ghcr.io/laurisneimanis/ccore-ai-demo-frontend:latest`
+
+**Production NEVER builds images on EC2** — images are pulled only.
+
+---
+
+## 3. Local Development
+
+Run backend + frontend locally:
+
+```bash
+docker compose -f compose/docker-compose.dev.yml up --build
+```
+
+Frontend URL:
+```
+http://localhost:8501
+```
+
+Backend URL:
+```
+http://localhost:8000
+```
+
+---
+
+## 4. Architecture (Local-Level)
 
 ```mermaid
 flowchart LR
@@ -74,84 +100,69 @@ flowchart LR
     API --> DB[(Chroma Vector DB)]
 ```
 
-> Nginx reverse proxy is added only at the infrastructure layer  
-> (see `ccore-ai-infra` repo).
+> Reverse proxy, HTTPS termination, inventory and deployment  
+> are handled entirely in the **ccore-ai-infra** repository.
 
 ---
 
-## 5. CI / CD Pipeline
+## 5. CI Pipeline (Image Build & Publish)
 
 ```mermaid
 flowchart LR
-    A[Commit to Repo] --> B[GitHub Actions Build]
-    B --> C[Build Backend & Frontend Images]
-    C --> D[Push to GHCR]
-    D --> E[ccore-ai-infra Deployment]
+    A[Commit to Repo] --> B[GitHub Actions]
+    B --> C[Build Backend Image]
+    B --> D[Build Frontend Image]
+    C --> E[Push to GHCR]
+    D --> E[Push to GHCR]
+    E --> F[Pulled by Terraform + Ansible Infrastructure]
 ```
 
-Production server never builds containers —  
-it only **pulls** the latest images defined here.
+The infrastructure layer consumes only GHCR images.  
+No runtime builds occur on the target machine.
 
 ---
 
-## 6. Local Development
+## 6. Production Deployment (via ccore-ai-infra)
 
-Run locally:
+The complete deployment workflow:
 
-```bash
-docker compose -f compose/docker-compose.dev.yml up --build
-```
+1. **Terraform** provisions AWS VPC + EC2  
+2. **cloud-init** prepares Python & SSH  
+3. **Ansible** installs Docker + Compose  
+4. Ansible renders templates:
+   - `docker-compose.yml`  
+   - `nginx.conf`  
+5. EC2 pulls images:
+   - backend  
+   - frontend  
+   - nginx  
+6. Stack launched under `/opt/ccore-ai`
 
-Frontend available at:
-
-```
-http://localhost:8501
-```
-
-Backend available at:
-
-```
-http://localhost:8000
-```
-
----
-
-## 7. Production Deployment (via ccore-ai-infra)
-
-- Terraform provisions AWS infrastructure
-- Ansible installs Docker Engine
-- Ansible deploys a Docker Compose stack that pulls:
-
-  - `ghcr.io/laurisneimanis/ccore-ai-demo-backend:latest`
-  - `ghcr.io/laurisneimanis/ccore-ai-demo-frontend:latest`
-
-- Nginx HTTPS termination and directory layout are handled by the infra project
-
-🔗 Infrastructure repo:  
+Infrastructure repo:  
 https://github.com/LaurisNeimanis/ccore-ai-infra
 
 ---
 
-## 8. Security & Best Practices
+## 7. Security & Best Practices
 
-- Deterministic CI builds
-- No secrets baked into images
-- Backend not exposed publicly (proxy-only architecture)
-- HTTPS termination handled by infra
-- GHCR authentication handled via GitHub Actions
+- No secrets included in images  
+- Backend reachable only via Nginx reverse proxy  
+- HTTPS termination handled at infrastructure level  
+- CI builds produce immutable images  
+- Repo contains no sensitive data or credentials  
 
 ---
 
-## 9. Purpose
+## 8. Purpose
 
-This repository provides a **clean demonstration** of:
+This repository serves as:
 
-- API + UI separation
-- Containerized app design
-- CI → image pipeline
-- Integration with an IaC-controlled infrastructure stack
+- a **clean demo application** for infrastructure testing,  
+- a realistic example of containerized backend + frontend design,  
+- a demonstration of CI → image → IaC → deployment workflow,  
+- a fully reproducible module used by the **Infrastructure Architect demo project**.
 
-No production datasets or business logic included.
+No production logic or datasets included.
 
 ---
 
