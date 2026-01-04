@@ -7,8 +7,8 @@ This repository contains the **application layer** (backend + frontend) for the
 The design follows clean DevOps principles:
 
 - strict backend / frontend separation  
-- deterministic Docker image builds  
-- CI → GHCR publishing  
+- deterministic **multi-architecture** Docker image builds (amd64 / arm64)  
+- CI → GHCR publishing (manifest lists)  
 - production deployments are **pull-only** (no builds on servers)  
 - fully compatible with the Terraform + Ansible automation layer  
 
@@ -62,13 +62,20 @@ ccore-ai-demo/
 - Runs in local-only mode for demo purposes  
 
 ### Containers & DevOps
-- Separate Dockerfiles for backend & frontend  
-- GitHub Actions build pipelines  
-- Images pushed to GHCR under:
+
+- Separate Dockerfiles for backend and frontend  
+- GitHub Actions CI pipelines using **Buildx + QEMU**  
+- **Multi-architecture Docker images** published as a single tag  
+  - Supported platforms: `linux/amd64`, `linux/arm64`
+- Images pushed to GHCR:
   - `ghcr.io/laurisneimanis/ccore-ai-demo-backend:latest`
   - `ghcr.io/laurisneimanis/ccore-ai-demo-frontend:latest`
 
-**Production NEVER builds images on EC2** — images are pulled only.
+Each image tag is a **multi-architecture manifest**, automatically matching:
+- x86_64 (standard EC2 / local Linux)
+- ARM64 (AWS Graviton, Apple Silicon)
+
+**Production never builds images on EC2** — all images are pulled from GHCR.
 
 ---
 
@@ -117,7 +124,8 @@ flowchart LR
     E --> F[Pulled by Terraform + Ansible Infrastructure]
 ```
 
-The infrastructure layer consumes only GHCR images.  
+The infrastructure layer consumes only GHCR images.
+Images are **architecture-aware** and automatically match the target host.
 No runtime builds occur on the target machine.
 
 ---
