@@ -57,9 +57,9 @@ ccore-ai-demo/
 - Zero local Python dependencies (Docker only)  
 
 ### Vector Database — **Chroma**
-- Embedded vector store  
-- Demonstrates basic RAG-style retrieval  
+- Included in the compose topology to show where a vector store fits  
 - Runs in local-only mode for demo purposes  
+- The current backend uses a stubbed RAG response and does not query Chroma yet  
 
 ### Containers & DevOps
 
@@ -71,11 +71,11 @@ ccore-ai-demo/
   - `ghcr.io/laurisneimanis/ccore-ai-demo-backend:latest`
   - `ghcr.io/laurisneimanis/ccore-ai-demo-frontend:latest`
 
-Each image tag is a **multi-architecture manifest**, automatically matching:
+Each `latest` tag is a **multi-architecture manifest**, automatically matching:
 - x86_64 (standard EC2 / local Linux)
 - ARM64 (AWS Graviton, Apple Silicon)
 
-**Production never builds images on EC2** — all images are pulled from GHCR.
+**Production-style deployments never build images on EC2** — images are pulled from GHCR. For true immutable promotion, use release tags or image digests instead of `latest`.
 
 ---
 
@@ -156,7 +156,7 @@ https://github.com/LaurisNeimanis/ccore-ai-infra
 - No secrets included in images  
 - Backend reachable only via Nginx reverse proxy  
 - HTTPS termination handled at infrastructure level  
-- CI builds produce immutable images  
+- CI builds publish pre-built multi-architecture images  
 - Repo contains no sensitive data or credentials  
 
 ---
